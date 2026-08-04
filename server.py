@@ -141,7 +141,7 @@ def signup():
     if not is_valid_email(email):
         return jsonify({"error": "Invalid email address format."}), 400
     if not is_valid_password(password):
-        return jsonify({"error": "Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character."}), 400
+        return jsonify({"error": "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character."}), 400
 
     hashed_pw = hashlib.sha256(password.encode()).hexdigest()
     table = get_dynamo_resource().Table('NovaChatUsers')
@@ -239,5 +239,5 @@ except Exception as e:
     print("Database init skipped/failed:", e)
 
 if __name__ == "__main__":
-    print("Server starting on http://127.0.0.1:5000")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    print("Server starting on http://127.0.0.1:3008")
+    app.run(host="0.0.0.0", port=3008, debug=True)
