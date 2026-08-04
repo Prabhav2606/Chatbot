@@ -164,17 +164,22 @@ def signin():
     data = request.json
     email = data.get("email", "").strip().lower()
     password = data.get("password", "").strip()
-    
     hashed_pw = hashlib.sha256(password.encode()).hexdigest()
-    table = get_dynamo_resource().Table('NovaChatUsers')
+
+    try:
+        table = get_dynamo_resource().Table('NovaChatUsers')
+        response = table.get_item(Key={'email': email})
+        item = response.get('Item')
     
-    response = table.get_item(Key={'email': email})
-    item = response.get('Item')
-    
-    if item and item.get('password_hash') == hashed_pw:
-        return jsonify({"status": "success", "user_id": email})
-    else:
-        return jsonify({"error": "Invalid email or password"}), 401
+        if item and item.get('password_hash') == hashed_pw:
+            return jsonify({"status": "success", "user_id": email})
+        else:
+            return jsonify({"error": "Invalid email or password"}), 401
+
+    except Exception as e:
+        # This will catch AWS errors and send them to your browser console as JSON!
+        print(f"DynamoDB Error: {str(e)}")
+        return jsonify({"error": f"Database Connection Error: {str(e)}"}), 500
 
 # --- CHAT ROUTES ---
 
