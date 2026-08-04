@@ -22,7 +22,10 @@
             <div class="auth-success" id="authSuccess"></div>
         
             <input type="email" id="email" class="auth-input" placeholder="Email Address">
-            <input type="password" id="password" class="auth-input" placeholder="Password">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <input type="password" id="password" class="auth-input" placeholder="Password" style="margin-bottom: 0;">
+                <button type="button" class="btn-small" onclick="togglePassword(this)" style="background-color: #333; padding: 0 12px; height: 42px; font-weight: bold;">Show</button>
+            </div>
             <div class="password-hint" id="pwHint">Must be 8+ chars, with upper, lower, number & special char.</div>
         
             <button class="auth-btn" id="primaryAuthBtn" onclick="signIn()">Sign In</button>
