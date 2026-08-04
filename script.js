@@ -24,6 +24,14 @@ function toggleMode() {
     const secondaryBtn = document.getElementById('secondaryAuthBtn');
     const pwHint = document.getElementById('pwHint');
 
+    // Reset password visibility automatically
+    const pwdInput = document.getElementById('password');
+    const eyeOpen = document.getElementById('eyeOpen');
+    const eyeClosed = document.getElementById('eyeClosed');
+    pwdInput.type = 'password';
+    eyeOpen.style.display = 'block';
+    eyeClosed.style.display = 'none';
+
     if (authMode === 'signin') {
         authMode = 'signup';
         title.innerText = 'Register';
@@ -31,8 +39,7 @@ function toggleMode() {
         primaryBtn.onclick = signUp;
         secondaryBtn.innerText = 'Back to Sign In';
         pwHint.style.display = 'block';
-    }
-    else {
+    } else {
         authMode = 'signin';
         title.innerText = 'Sign In';
         primaryBtn.innerText = 'Sign In';
@@ -42,14 +49,19 @@ function toggleMode() {
     }
 }
 
-function togglePassword(btnElement) {
+function togglePassword() {
     const pwdInput = document.getElementById('password');
+    const eyeOpen = document.getElementById('eyeOpen');
+    const eyeClosed = document.getElementById('eyeClosed');
+
     if (pwdInput.type === 'password') {
         pwdInput.type = 'text';
-        btnElement.innerText = 'Hide';
+        eyeOpen.style.display = 'none';
+        eyeClosed.style.display = 'block';
     } else {
         pwdInput.type = 'password';
-        btnElement.innerText = 'Show';
+        eyeOpen.style.display = 'block';
+        eyeClosed.style.display = 'none';
     }
 }
 
