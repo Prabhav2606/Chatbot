@@ -82,14 +82,6 @@ body {
   display: none;
 }
 
-.password-hint {
-  font-size: 11px;
-  color: #aaa;
-  text-align: left;
-  margin-bottom: 12px;
-  display: none;
-}
-
 /* Chat Screen */
 
 .chat-container {
