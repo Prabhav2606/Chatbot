@@ -15,7 +15,7 @@ CORS(app)
 # --- CONFIGURATION ---
 # When deployed on Render, boto3 will automatically read your AWS keys from environment variables.
 REGION = os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
-MODEL_ID = "us.amazon.nova-lite-v1:0"
+MODEL_ID = "us.amazon.nova-micro-v1:0"
 
 bedrock_client = boto3.client("bedrock-runtime", region_name=REGION)
 dynamodb_client = boto3.client("dynamodb", region_name=REGION)
