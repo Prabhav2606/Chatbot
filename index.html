@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Amazon Nova AI Chat</title>
+
+        <link rel="stylesheet" href="style.css">
+
+    </head>
+
+    <body>
+
+        <!-- Login / Signup Screen -->
+        <div class="auth-container" id="authScreen">
+            <h2 id="authTitle">Sign In</h2>
+            <div class="auth-error" id="authError"></div>
+            <div class="auth-success" id="authSuccess"></div>
+        
+            <input type="email" id="email" class="auth-input" placeholder="Email Address">
+            <input type="password" id="password" class="auth-input" placeholder="Password">
+            <div class="password-hint" id="pwHint">Must be 8+ chars, with upper, lower, number & special char.</div>
+        
+            <button class="auth-btn" id="primaryAuthBtn" onclick="signIn()">Sign In</button>
+            <button class="auth-btn secondary" id="secondaryAuthBtn" onclick="toggleMode()">Create an Account</button>
+        </div>
+    
+        <!-- Chat Screen -->
+        <div class="chat-container" id="chatScreen">
+            <div class="chat-header">
+                <span id="chatHeaderTitle" style="font-size: 14px;">Amazon Nova Web Assistant</span>
+                <div class="header-controls">
+                    <button class="btn-small logout-btn" onclick="logOut()">Logout</button>
+                    <button class="btn-small clear-btn" onclick="clearChat()">Clear Chat</button>
+                </div>
+            </div>
+            <div class="chat-box" id="chatBox"></div>
+            <div class="input-area">
+                <input type="text" id="userInput" class="msg-input" placeholder="Type a message..." autocomplete="new-password" onkeydown="if(event.key==='Enter') sendMessage()">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    
+        <script src="script.js"></script>
+
+    </body>
+
+</html>
