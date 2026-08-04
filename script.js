@@ -34,8 +34,8 @@ function toggleMode() {
 
     if (authMode === 'signin') {
         authMode = 'signup';
-        title.innerText = 'Register';
-        primaryBtn.innerText = 'Register';
+        title.innerText = 'Sign Up';
+        primaryBtn.innerText = 'Sign Up';
         primaryBtn.onclick = signUp;
         secondaryBtn.innerText = 'Back to Sign In';
         pwHint.style.display = 'block';
