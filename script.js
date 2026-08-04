@@ -42,6 +42,17 @@ function toggleMode() {
     }
 }
 
+function togglePassword(btnElement) {
+    const pwdInput = document.getElementById('password');
+    if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        btnElement.innerText = 'Hide';
+    } else {
+        pwdInput.type = 'password';
+        btnElement.innerText = 'Show';
+    }
+}
+
 async function signUp() {
     hideMessages();
     const email = document.getElementById('email').value.trim();
