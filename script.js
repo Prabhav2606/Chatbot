@@ -154,7 +154,7 @@ async function confirmDeleteAccount() {
         if (data.status === 'deleted') {
             alert("Your account has been successfully deleted.");
             closeDeleteModal();
-            logOut(); // Safely reset the UI to the sign-in screen
+            signOut(); // Safely reset the UI to the sign-in screen
         } else {
             alert("Error: " + (data.error || "Failed to delete account"));
         }
@@ -165,19 +165,23 @@ async function confirmDeleteAccount() {
     }
 }
 
-function logOut() {
-    // 1. Clear the active session
+function signOut() {
+    // 1. Ask for confirmation
+    const isConfirmed = confirm("Are you sure you want to sign out?");
+    if (!isConfirmed) return; // Stop the function if they cancel
+
+    // 2. Clear the active session
     activeUserId = null;
     
-    // 2. Flip the screens back
+    // 3. Flip the screens back
     document.getElementById('chatScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'block';
 
-    // 3. Clear the input fields so the old password doesn't sit there
+    // 4. Clear the input fields so the old password doesn't sit there
     document.getElementById('email').value = '';
     document.getElementById('password').value = '';
 
-    // 4. Force the password field back to hidden (Reset the eye icons)
+    // 5. Force the password field back to hidden (Reset the eye icons)
     const pwdInput = document.getElementById('password');
     const eyeOpen = document.getElementById('eyeOpen');
     const eyeClosed = document.getElementById('eyeClosed');
@@ -185,8 +189,8 @@ function logOut() {
     pwdInput.type = 'password';
     eyeOpen.style.display = 'block';
     eyeClosed.style.display = 'none';
-        
-    // 5. Hide any lingering error messages or popups
+    
+    // 6. Hide any lingering error messages or popups
     hideMessages();
 }
 
@@ -207,6 +211,10 @@ async function loadUserHistory() {
 }
 
 async function clearChat() {
+
+    // Ask for confirmation
+    const isConfirmed = confirm("Are you sure you want to clear your entire chat history?\nThis cannot be undone!");
+    if (!isConfirmed) return; // Stop the function if they cancel
 
     await fetch('/api/clear', { 
         method: 'POST',
