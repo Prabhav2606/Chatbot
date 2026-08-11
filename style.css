@@ -122,27 +122,27 @@ body {
   cursor: pointer;
 }
 
-.delete-btn {
+.deleteAccount-btn {
   background-color: #8b0000;
 }
 
-.delete-btn:hover {
+.deleteAccount-btn:hover {
   background-color: #660000;
 }
 
-.logout-btn {
+.signOut-btn {
   background-color: #555;
 }
 
-.logout-btn:hover {
+.signOut-btn:hover {
   background-color: #666;
 }
 
-.clear-btn {
+.clearChat-btn {
   background-color: #d9534f;
 }
 
-.clear-btn:hover {
+.clearChat-btn:hover {
   background-color: #c9302c;
 }
 
