@@ -181,6 +181,51 @@ def signin():
         print(f"DynamoDB Error: {str(e)}")
         return jsonify({"error": f"Database Connection Error: {str(e)}"}), 500
 
+@app.route("/api/delete_account", methods=["POST"])
+def delete_account():
+    data = request.json
+    user_id = data.get("user_id")
+    password = data.get("password")
+    
+    if not user_id or not password:
+        return jsonify({"error": "Email and password are required"}), 400
+        
+    hashed_pw = hashlib.sha256(password.encode()).hexdigest()
+        
+    try:
+        # 1. Verify User Credentials First
+        users_table = get_dynamo_resource().Table('NovaChatUsers')
+        response = users_table.get_item(Key={'email': user_id})
+        item = response.get('Item')
+        
+        if not item or item.get('password_hash') != hashed_pw:
+            return jsonify({"error": "Incorrect password."}), 401
+            
+        # 2. Password is correct. Delete all messages from Chat table
+        messages_table = get_dynamo_resource().Table('NovaChatMessages')
+        msg_response = messages_table.query(
+            KeyConditionExpression=Key('user_id').eq(user_id)
+        )
+        with messages_table.batch_writer() as batch:
+            for msg_item in msg_response.get('Items', []):
+                batch.delete_item(
+                    Key={
+                        'user_id': user_id,
+                        'timestamp': msg_item['timestamp']
+                    }
+                )
+        
+        # 3. Delete the user from the Users table
+        users_table.delete_item(
+            Key={'email': user_id}
+        )
+        
+        return jsonify({"status": "deleted"})
+        
+    except Exception as e:
+        print(f"DynamoDB Delete Error: {str(e)}")
+        return jsonify({"error": f"Database Connection Error: {str(e)}"}), 500
+
 # --- CHAT ROUTES ---
 
 @app.route("/")
