@@ -83,7 +83,7 @@ async function signUp() {
         showMessage(data.error);
     }
     else {
-        alert("Registration successful! You can now log in.");
+        alert("Account created! You can now log in.");
         toggleMode(); 
         document.getElementById('password').value = '';
     }
@@ -119,13 +119,75 @@ async function signIn() {
     }
 }
 
-function logOut() {
+function deleteAccount() {
+    // Show the modal and clear out any old text
+    document.getElementById('deleteModal').style.display = 'flex';
+    document.getElementById('deletePassword').value = '';
+}
 
+function closeDeleteModal() {
+    // Hide the modal
+    document.getElementById('deleteModal').style.display = 'none';
+}
+
+async function confirmDeleteAccount() {
+    const password = document.getElementById('deletePassword').value.trim();
+    
+    if (!password) {
+        alert("Please enter your password to confirm.");
+        return;
+    }
+
+    try {
+        // Send both the user ID and the password to the backend
+        const res = await fetch('/api/delete_account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                user_id: activeUserId,
+                password: password
+            })
+        });
+            
+        const data = await res.json();
+        
+        if (data.status === 'deleted') {
+            alert("Your account has been successfully deleted.");
+            closeDeleteModal();
+            logOut(); // Safely reset the UI to the sign-in screen
+        } else {
+            alert("Error: " + (data.error || "Failed to delete account"));
+        }
+    }
+    catch (err) {
+        alert("Failed to connect to server.");
+        console.error(err);
+    }
+}
+
+function logOut() {
+    // 1. Clear the active session
     activeUserId = null;
+    
+    // 2. Flip the screens back
     document.getElementById('chatScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'block';
-    document.getElementById('chatBox').innerHTML = '';
 
+    // 3. Clear the input fields so the old password doesn't sit there
+    document.getElementById('email').value = '';
+    document.getElementById('password').value = '';
+
+    // 4. Force the password field back to hidden (Reset the eye icons)
+    const pwdInput = document.getElementById('password');
+    const eyeOpen = document.getElementById('eyeOpen');
+    const eyeClosed = document.getElementById('eyeClosed');
+        
+    pwdInput.type = 'password';
+    eyeOpen.style.display = 'block';
+    eyeClosed.style.display = 'none';
+        
+    // 5. Hide any lingering error messages or popups
+    hideMessages();
 }
 
 async function loadUserHistory() {
