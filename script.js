@@ -83,7 +83,7 @@ async function signUp() {
         showMessage(data.error);
     }
     else {
-        alert("Account created! You can now log in.");
+        alert("Account created! You can now sign in.");
         toggleMode(); 
         document.getElementById('password').value = '';
     }
