@@ -127,14 +127,14 @@ async function signIn() {
 }
 
 function deleteAccount() {
-    // Show the modal and clear out any old text
-    document.getElementById('deleteModal').style.display = 'flex';
+    // Show the model and clear out any old text
+    document.getElementById('deleteModel').style.display = 'flex';
     document.getElementById('deletePassword').value = '';
 }
 
-function closeDeleteModal() {
-    // Hide the modal
-    document.getElementById('deleteModal').style.display = 'none';
+function closeDeleteModel() {
+    // Hide the model
+    document.getElementById('deleteModel').style.display = 'none';
 }
 
 async function confirmDeleteAccount() {
@@ -160,7 +160,7 @@ async function confirmDeleteAccount() {
         
         if (data.status === 'deleted') {
             alert("Your account has been successfully deleted.");
-            closeDeleteModal();
+            closeDeleteModel();
             signOut(); // Safely reset the UI to the sign-in screen
         } else {
             alert("Error: " + (data.error || "Failed to delete account"));
