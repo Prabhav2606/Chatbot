@@ -12,7 +12,7 @@ function showMessage(msg, isError = true) {
         succDiv.innerText = msg; succDiv.style.display = 'block'; errDiv.style.display = 'none';
     }
 }
-    
+
 function hideMessages() {
     document.getElementById('authError').style.display = 'none';
     document.getElementById('authSuccess').style.display = 'none';
