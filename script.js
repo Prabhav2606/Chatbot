@@ -37,14 +37,12 @@ function toggleMode() {
         primaryBtn.innerText = 'Sign Up';
         primaryBtn.onclick = signUp;
         secondaryBtn.innerText = 'Back to Sign In';
-        pwHint.style.display = 'block';
     } else {
         authMode = 'signin';
         title.innerText = 'Sign In';
         primaryBtn.innerText = 'Sign In';
         primaryBtn.onclick = signIn;
         secondaryBtn.innerText = 'Create an Account';
-        pwHint.style.display = 'none';
     }
 }
 
