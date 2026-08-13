@@ -97,7 +97,8 @@ async function signIn() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
         
-    if (!email) return showMessage("Please enter your email address.");
+    if (!email && !password) return showMessage("Please enter your email address and password.");
+    else if (!email) return showMessage("Please enter your email address.");
     else if (!password) return showMessage("Please enter your password.");
 
     const res = await fetch('/api/signin', {
@@ -117,6 +118,7 @@ async function signIn() {
         document.getElementById('chatScreen').style.display = 'flex';
         document.getElementById('headerUserName').innerText = data.name;
         
+        document.getElementById('name').value = '';
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
         
@@ -183,6 +185,7 @@ function signOut() {
     document.getElementById('authScreen').style.display = 'block';
 
     // 4. Clear the input fields so the old password doesn't sit there
+    document.getElementById('name').value = '';
     document.getElementById('email').value = '';
     document.getElementById('password').value = '';
 
