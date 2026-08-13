@@ -22,6 +22,7 @@
             <div class="auth-error" id="authError"></div>
             <div class="auth-success" id="authSuccess"></div>
         
+            <input type="text" id="name" class="auth-input" placeholder="Name" style="display: none;">
             <input type="email" id="email" class="auth-input" placeholder="Email Address">
 
             <!-- Password Field with Embedded Icon -->
@@ -53,7 +54,7 @@
         <!-- Chat Screen -->
         <div class="chat-container" id="chatScreen">
             <div class="chat-header">
-                <span id="chatHeaderTitle" style="font-size: 14px;">Amazon Nova</span>
+                <span id="headerUserName" style="font-weight: bold;">Loading...</span>
                 <div class="header-controls">
                     <button class="btn-small deleteAccount-btn" onclick="deleteAccount()">Delete Account</button>
                     <button class="btn-small signOut-btn" onclick="signOut()">Sign Out</button>
