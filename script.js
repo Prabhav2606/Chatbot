@@ -1,6 +1,6 @@
 let activeUserId = null;
 let activeUserName = "";
-let authMode = 'signin'; 
+let authMode = 'signin';
 
 function showMessage(msg, isError = true) {
     const errDiv = document.getElementById('authError');
