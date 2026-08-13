@@ -1,4 +1,5 @@
 let activeUserId = null;
+let activeUserName = "";
 let authMode = 'signin'; 
 
 function showMessage(msg, isError = true) {
@@ -22,6 +23,7 @@ function toggleMode() {
     const title = document.getElementById('authTitle');
     const primaryBtn = document.getElementById('primaryAuthBtn');
     const secondaryBtn = document.getElementById('secondaryAuthBtn');
+    const nameInput = document.getElementById('name');
 
     // Reset password visibility automatically
     const pwdInput = document.getElementById('password');
@@ -37,12 +39,14 @@ function toggleMode() {
         primaryBtn.innerText = 'Sign Up';
         primaryBtn.onclick = signUp;
         secondaryBtn.innerText = 'Back to Sign In';
+        nameInput.style.display = 'block'; // Show name field
     } else {
         authMode = 'signin';
         title.innerText = 'Sign In';
         primaryBtn.innerText = 'Sign In';
         primaryBtn.onclick = signIn;
         secondaryBtn.innerText = 'Create an Account';
+        nameInput.style.display = 'none'; // Hide name field
     }
 }
 
@@ -64,15 +68,18 @@ function togglePassword() {
 
 async function signUp() {
     hideMessages();
+    const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
         
-    if (!email || !password) return showMessage("Please enter email and password.");
+    if (!name) return showMessage("Please enter your name.");
+    else if (!email) return showMessage("Please enter your email address.");
+    else if (!password) return showMessage("Please enter your password.");
 
     const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ name, email, password })
     });
     const data = await res.json();
     
@@ -81,8 +88,7 @@ async function signUp() {
     }
     else {
         alert("Account created! You can now sign in.");
-        toggleMode(); 
-        document.getElementById('password').value = '';
+        toggleMode();
     }
 }
 
@@ -91,7 +97,8 @@ async function signIn() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
         
-    if (!email || !password) return showMessage("Please enter email and password.");
+    if (!email) return showMessage("Please enter your email address.");
+    else if (!password) return showMessage("Please enter your password.");
 
     const res = await fetch('/api/signin', {
         method: 'POST',
@@ -105,9 +112,10 @@ async function signIn() {
     }
     else {
         activeUserId = data.user_id;
+        activeUserName = data.name;
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('chatScreen').style.display = 'flex';
-        document.getElementById('chatHeaderTitle').innerText = activeUserId;
+        document.getElementById('headerUserName').innerText = data.name;
         
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
@@ -217,11 +225,13 @@ async function clearChat() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: activeUserId })
-    });
+    }).catch(err => {
+            console.error("Failed to clear backend history:", err);
+        });
 
     document.getElementById('chatBox').innerHTML = '';
 
-    appendMessage("Hello! How can I help you today?", "assistant");
+    appendMessage(`Hello ${activeUserName}! How can I help you today?`, `assistant`);
 
 }
 
