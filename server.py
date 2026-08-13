@@ -73,8 +73,20 @@ def load_history(user_id):
     
     # If new user, seed the greeting
     if len(items) == 0:
-        greeting = "Hello! How can I help you today?"
+
+        # Fetch the user's name from the Users table
+        users_table = get_dynamo_resource().Table('NovaChatUsers')
+        user_response = users_table.get_item(Key={'email': user_id})
+        user_item = user_response.get('Item', {})
+
+        # Get the name (fallback to 'there' just in case a name is missing)
+        user_name = user_item.get('name', 'there')
+
+        # Create and save the personalized greeting
+        greeting = f"Hello {user_name}! How can I help you today?"
         save_message(user_id, 'assistant', greeting)
+
+        # Add it to the current session items
         items = [{'role': 'assistant', 'text_content': greeting}]
         
     history = []
@@ -114,8 +126,17 @@ def clear_db(user_id):
                 }
             )
             
-    # Add the initial greeting back
-    save_message(user_id, 'assistant', "Hello! How can I help you today?")
+    # Fetch the user's name from the Users table
+    users_table = get_dynamo_resource().Table('NovaChatUsers')
+    user_response = users_table.get_item(Key={'email': user_id})
+    user_item = user_response.get('Item', {})
+    
+    # Get the name (fallback to 'there' just in case a name is missing)
+    user_name = user_item.get('name', 'there')
+    
+    # Add the personalized initial greeting back
+    greeting = f"Hello {user_name}! How can I help you today?"
+    save_message(user_id, 'assistant', greeting)
 
 # --- VALIDATION HELPERS ---
 
@@ -135,6 +156,7 @@ def is_valid_password(password):
 @app.route("/api/signup", methods=["POST"])
 def signup():
     data = request.json
+    name = data.get("name", "").strip()
     email = data.get("email", "").strip().lower()
     password = data.get("password", "").strip()
     
@@ -144,20 +166,27 @@ def signup():
         return jsonify({"error": "Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, a number, and a special character."}), 400
 
     hashed_pw = hashlib.sha256(password.encode()).hexdigest()
-    table = get_dynamo_resource().Table('NovaChatUsers')
-    
-    # Check if user exists
-    response = table.get_item(Key={'email': email})
-    if 'Item' in response:
-        return jsonify({"error": "An account with this email already exists."}), 400
-        
-    table.put_item(
-        Item={
-            'email': email,
-            'password_hash': hashed_pw
-        }
-    )
-    return jsonify({"status": "success"})
+
+    try:
+        table = get_dynamo_resource().Table('NovaChatUsers')
+
+        # Check if user exists
+        response = table.get_item(Key={'email': email})
+        if 'Item' in response:
+            return jsonify({"error": "An account with this email already exists."}), 400
+
+        table.put_item(
+            Item={
+                'name': name,
+                'email': email,
+                'password_hash': hashed_pw
+            }
+        )
+        return jsonify({"status": "success"})
+    except Exception as e:
+        print(f"DynamoDB Signup Error: {str(e)}")
+        return jsonify({"error": f"Database Connection Error: {str(e)}"}), 500
+
 
 @app.route("/api/signin", methods=["POST"])
 def signin():
@@ -172,13 +201,14 @@ def signin():
         item = response.get('Item')
     
         if item and item.get('password_hash') == hashed_pw:
-            return jsonify({"status": "success", "user_id": email})
+            user_name = item.get('name')
+            return jsonify({"status": "success", "user_id": email, "name": user_name})
         else:
             return jsonify({"error": "Invalid email or password"}), 401
 
     except Exception as e:
         # This will catch AWS errors and send them to your browser console as JSON!
-        print(f"DynamoDB Error: {str(e)}")
+        print(f"DynamoDB Signin Error: {str(e)}")
         return jsonify({"error": f"Database Connection Error: {str(e)}"}), 500
 
 @app.route("/api/delete_account", methods=["POST"])
