@@ -22,7 +22,6 @@ function toggleMode() {
     const title = document.getElementById('authTitle');
     const primaryBtn = document.getElementById('primaryAuthBtn');
     const secondaryBtn = document.getElementById('secondaryAuthBtn');
-    const pwHint = document.getElementById('pwHint');
 
     // Reset password visibility automatically
     const pwdInput = document.getElementById('password');
