@@ -70,14 +70,14 @@
     
         <script src="script.js"></script>
 
-        <!-- Secure Delete Account Modal -->
-        <div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+        <!-- Secure Delete Account Model -->
+        <div id="deleteModel" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
             <div style="background-color: #1e1e1e; padding: 24px; border-radius: 8px; width: 300px; text-align: center; border: 1px solid #333;">
                 <h3 style="margin-top: 0; color: #ff5c5c;">Delete Account</h3>
                 <p style="font-size: 14px; margin-bottom: 20px; color: #ccc;"><br>Enter your password to permanently delete your account and chat history.<br><br><strong>This action cannot be undone!</strong></p>
                 <input type="password" id="deletePassword" class="auth-input" placeholder="Password" style="width: 100%; margin-bottom: 20px; text-align: center;">
                 <div style="display: flex; gap: 12px;">
-                    <button class="btn-small" onclick="closeDeleteModal()" style="flex: 1; background-color: #444;">Cancel</button>
+                    <button class="btn-small" onclick="closeDeleteModel()" style="flex: 1; background-color: #444;">Cancel</button>
                     <button class="btn-small deleteAccount-btn" onclick="confirmDeleteAccount()" style="flex: 1;">Delete</button>
                 </div>
             </div>
