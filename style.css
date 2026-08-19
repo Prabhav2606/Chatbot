@@ -49,6 +49,43 @@ button {
 
 /* Auth Screen */
 
+.auth-screen {
+  width: 100%;
+  min-height: 620px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: clamp(28px, 5vh, 44px);
+}
+
+.welcome-title {
+  width: min(100%, 540px);
+  margin-bottom: clamp(50px, 60px, 80px);
+}
+
+.welcome-title-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.welcome-stroke {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 2400;
+  stroke-dashoffset: 2400;
+}
+
+.welcome-title.is-writing .welcome-stroke {
+  animation: welcome-handwriting var(--duration, 220ms) cubic-bezier(0.35, 0, 0.2, 1) forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
 .auth-container {
   width: 100%;
   max-width: 410px;
@@ -595,6 +632,12 @@ button.send-btn:focus-visible,
   }
 }
 
+@keyframes welcome-handwriting {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 @keyframes mic-pulse {
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(236, 106, 116, 0.52);
@@ -608,6 +651,10 @@ button.send-btn:focus-visible,
 @media (max-width: 640px) {
   body {
     padding: 0;
+  }
+
+  .auth-screen {
+    min-height: 640px;
   }
 
   .auth-container {
