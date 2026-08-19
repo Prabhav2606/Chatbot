@@ -398,6 +398,16 @@ function confirmSignOut() {
     performSignOut();
 }
 
+function replayWelcomeAnimation() {
+    const welcomeTitle = document.querySelector('.welcome-title');
+    if (!welcomeTitle) return;
+
+    // Reset the completed keyframe animation before showing the auth screen again.
+    welcomeTitle.classList.remove('is-writing');
+    void welcomeTitle.offsetWidth;
+    welcomeTitle.classList.add('is-writing');
+}
+
 function performSignOut() {
     stopSpeechRecognition(true);
 
@@ -406,7 +416,8 @@ function performSignOut() {
     
     // 3. Flip the screens back
     document.getElementById('chatScreen').style.display = 'none';
-    document.getElementById('authScreen').style.display = 'block';
+    document.getElementById('authScreen').style.display = 'flex';
+    replayWelcomeAnimation();
 
     // 4. Clear the input fields so the old password doesn't sit there
     document.getElementById('name').value = '';
