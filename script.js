@@ -307,18 +307,51 @@ function deleteAccount() {
     // Show the model and clear out any old text
     document.getElementById('deleteModel').style.display = 'flex';
     document.getElementById('deletePassword').value = '';
+    clearDeletePasswordError();
 }
 
 function closeDeleteModel() {
     // Hide the model
     document.getElementById('deleteModel').style.display = 'none';
+    clearDeletePasswordError();
+}
+
+function closeModalOnBackdrop(event) {
+    if (event.target !== event.currentTarget) return;
+
+    const modalId = event.currentTarget.id;
+    if (modalId === 'deleteModel') {
+        closeDeleteModel();
+    } else if (modalId === 'clearChatModal') {
+        closeClearChatModal();
+    } else if (modalId === 'signOutModal') {
+        closeSignOutModal();
+    }
+}
+
+function showDeletePasswordError(message, isInvalidPassword = false) {
+    const passwordInput = document.getElementById('deletePassword');
+    const errorMessage = document.getElementById('deletePasswordError');
+
+    errorMessage.textContent = message;
+    errorMessage.classList.toggle('is-invalid', isInvalidPassword);
+    passwordInput.classList.toggle('is-invalid', isInvalidPassword);
+}
+
+function clearDeletePasswordError() {
+    const passwordInput = document.getElementById('deletePassword');
+    const errorMessage = document.getElementById('deletePasswordError');
+
+    errorMessage.textContent = '';
+    errorMessage.classList.remove('is-invalid');
+    passwordInput.classList.remove('is-invalid');
 }
 
 async function confirmDeleteAccount() {
     const password = document.getElementById('deletePassword').value.trim();
     
     if (!password) {
-        alert("Please enter your password to confirm.");
+        showDeletePasswordError('Please enter your password to confirm.');
         return;
     }
 
@@ -338,22 +371,34 @@ async function confirmDeleteAccount() {
         if (data.status === 'deleted') {
             alert("Your account has been successfully deleted.");
             closeDeleteModel();
-            signOut(); // Safely reset the UI to the sign-in screen
+            performSignOut(); // Safely reset the UI to the sign-in screen
         } else {
-            alert("Error: " + (data.error || "Failed to delete account"));
+            const backendMessage = data.error || 'Failed to delete account.';
+            const isIncorrectPassword = res.status === 401 || backendMessage.toLowerCase() === 'incorrect password!';
+            const message = isIncorrectPassword ? 'Incorrect password!' : backendMessage;
+            showDeletePasswordError(message, isIncorrectPassword);
         }
     }
     catch (err) {
-        alert("Failed to connect to server.");
+        showDeletePasswordError('Failed to connect to server. Please try again.');
         console.error(err);
     }
 }
 
 function signOut() {
-    // 1. Ask for confirmation
-    const isConfirmed = confirm("Are you sure you want to sign out?");
-    if (!isConfirmed) return; // Stop the function if they cancel
+    document.getElementById('signOutModal').style.display = 'flex';
+}
 
+function closeSignOutModal() {
+    document.getElementById('signOutModal').style.display = 'none';
+}
+
+function confirmSignOut() {
+    closeSignOutModal();
+    performSignOut();
+}
+
+function performSignOut() {
     stopSpeechRecognition(true);
 
     // 2. Clear the active session
@@ -397,11 +442,16 @@ async function loadUserHistory() {
     }
 }
 
-async function clearChat() {
+function clearChat() {
+    document.getElementById('clearChatModal').style.display = 'flex';
+}
 
-    // Ask for confirmation
-    const isConfirmed = confirm("Are you sure you want to clear your entire chat history?\nThis cannot be undone!");
-    if (!isConfirmed) return; // Stop the function if they cancel
+function closeClearChatModal() {
+    document.getElementById('clearChatModal').style.display = 'none';
+}
+
+async function confirmClearChat() {
+    closeClearChatModal();
 
     await fetch('/api/clear', { 
         method: 'POST',
