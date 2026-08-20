@@ -474,8 +474,7 @@ async function signUp() {
         showMessage(data.error);
     }
     else {
-        alert("Account created! You can now sign in.");
-        toggleMode();
+        showAccountCreatedModal();
     }
 }
 
@@ -580,9 +579,8 @@ async function confirmDeleteAccount() {
         const data = await res.json();
         
         if (data.status === 'deleted') {
-            alert("Your account has been successfully deleted.");
             closeDeleteModel();
-            performSignOut(); // Safely reset the UI to the sign-in screen
+            showAccountDeletedModal();
         } else {
             const backendMessage = data.error || 'Failed to delete account.';
             const isIncorrectPassword = res.status === 401 || backendMessage.toLowerCase() === 'incorrect password!';
@@ -606,6 +604,38 @@ function closeSignOutModal() {
 
 function confirmSignOut() {
     closeSignOutModal();
+    performSignOut();
+}
+
+function showAccountCreatedModal() {
+    document.getElementById('accountCreatedModal').style.display = 'flex';
+    document.getElementById('accountCreatedOkBtn').focus();
+}
+
+function confirmAccountCreationOnBackdrop(event) {
+    if (event.target === event.currentTarget) {
+        confirmAccountCreation();
+    }
+}
+
+function confirmAccountCreation() {
+    document.getElementById('accountCreatedModal').style.display = 'none';
+    document.getElementById('name').value = '';
+    document.getElementById('email').value = '';
+    clearPasswordInput(document.getElementById('password'));
+
+    if (authMode === 'signup') {
+        toggleMode();
+    }
+}
+
+function showAccountDeletedModal() {
+    document.getElementById('accountDeletedModal').style.display = 'flex';
+    document.getElementById('accountDeletedOkBtn').focus();
+}
+
+function confirmAccountDeletion() {
+    document.getElementById('accountDeletedModal').style.display = 'none';
     performSignOut();
 }
 
