@@ -9,6 +9,11 @@ let shouldIgnoreSpeechResults = false;
 let speechErrorMessage = '';
 let speechStatusTimer = null;
 
+function getFirstName(name) {
+    const nameParts = String(name || '').trim().split(/\s+/);
+    return nameParts[0] || 'there';
+}
+
 function getSpeechRecognitionConstructor() {
     return window.SpeechRecognition || window.webkitSpeechRecognition;
 }
@@ -474,7 +479,7 @@ async function confirmClearChat() {
 
     document.getElementById('chatBox').innerHTML = '';
 
-    appendMessage(`Hello ${activeUserName}! How can I help you today?`, `assistant`);
+    appendMessage(`Hello ${getFirstName(activeUserName)}! How can I help you today?`, `assistant`);
 
 }
 
