@@ -60,6 +60,10 @@ def init_db():
     except dynamodb_client.exceptions.ResourceInUseException:
         pass # Table already exists
 
+def get_first_name(name):
+    name_parts = str(name or '').split()
+    return name_parts[0] if name_parts else 'there'
+
 def load_history(user_id):
     table = get_dynamo_resource().Table('NovaChatMessages')
     
@@ -80,7 +84,7 @@ def load_history(user_id):
         user_item = user_response.get('Item', {})
 
         # Get the name (fallback to 'there' just in case a name is missing)
-        user_name = user_item.get('name', 'there')
+        user_name = get_first_name(user_item.get('name'))
 
         # Create and save the personalized greeting
         greeting = f"Hello {user_name}! How can I help you today?"
@@ -132,7 +136,7 @@ def clear_db(user_id):
     user_item = user_response.get('Item', {})
     
     # Get the name (fallback to 'there' just in case a name is missing)
-    user_name = user_item.get('name', 'there')
+    user_name = get_first_name(user_item.get('name'))
     
     # Add the personalized initial greeting back
     greeting = f"Hello {user_name}! How can I help you today?"
