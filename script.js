@@ -407,10 +407,24 @@ function toggleMode() {
     }
 }
 
-function togglePassword() {
-    const pwdInput = document.getElementById('password');
-    const eyeOpen = document.getElementById('eyeOpen');
-    const eyeClosed = document.getElementById('eyeClosed');
+function updatePasswordToggleIcon(eyeOpenId, eyeClosedId, toggleId, isVisible) {
+    const eyeOpen = document.getElementById(eyeOpenId);
+    const eyeClosed = document.getElementById(eyeClosedId);
+    const toggle = toggleId ? document.getElementById(toggleId) : null;
+
+    eyeOpen.style.display = isVisible ? 'none' : 'block';
+    eyeClosed.style.display = isVisible ? 'block' : 'none';
+
+    if (toggle) {
+        const label = isVisible ? 'Hide password' : 'Show password';
+        toggle.setAttribute('aria-label', label);
+        toggle.setAttribute('aria-pressed', String(isVisible));
+        toggle.title = label;
+    }
+}
+
+function togglePasswordField(inputId, eyeOpenId, eyeClosedId, toggleId) {
+    const pwdInput = document.getElementById(inputId);
     const state = getPasswordInputState(pwdInput);
     syncPasswordInputState(pwdInput, state);
 
@@ -419,13 +433,24 @@ function togglePassword() {
         state.isVisible = true;
         pwdInput.type = 'text';
         pwdInput.value = state.value;
-        eyeOpen.style.display = 'none';
-        eyeClosed.style.display = 'block';
+        updatePasswordToggleIcon(eyeOpenId, eyeClosedId, toggleId, true);
     } else {
         hidePasswordInput(pwdInput);
-        eyeOpen.style.display = 'block';
-        eyeClosed.style.display = 'none';
+        updatePasswordToggleIcon(eyeOpenId, eyeClosedId, toggleId, false);
     }
+}
+
+function togglePassword() {
+    togglePasswordField('password', 'eyeOpen', 'eyeClosed');
+}
+
+function toggleDeletePassword() {
+    togglePasswordField('deletePassword', 'deleteEyeOpen', 'deleteEyeClosed', 'deletePasswordToggle');
+}
+
+function resetDeletePasswordField() {
+    clearPasswordInput(document.getElementById('deletePassword'));
+    updatePasswordToggleIcon('deleteEyeOpen', 'deleteEyeClosed', 'deletePasswordToggle', false);
 }
 
 async function signUp() {
@@ -491,14 +516,14 @@ async function signIn() {
 function deleteAccount() {
     // Show the model and clear out any old text
     document.getElementById('deleteModel').style.display = 'flex';
-    clearPasswordInput(document.getElementById('deletePassword'));
+    resetDeletePasswordField();
     clearDeletePasswordError();
 }
 
 function closeDeleteModel() {
     // Hide the model
     document.getElementById('deleteModel').style.display = 'none';
-    clearPasswordInput(document.getElementById('deletePassword'));
+    resetDeletePasswordField();
     clearDeletePasswordError();
 }
 
