@@ -161,6 +161,28 @@
             </div>
         </div>
 
+        <!-- Account Created Confirmation Modal -->
+        <div id="accountCreatedModal" class="modal-overlay" style="display: none;" onclick="confirmAccountCreationOnBackdrop(event)" role="dialog" aria-modal="true" aria-labelledby="accountCreatedTitle">
+            <div class="account-created-modal">
+                <h3 id="accountCreatedTitle">Account Created</h3>
+                <p>Your account has been created successfully.<br>You can now sign in.</p>
+                <div class="sign-out-modal-actions">
+                    <button type="button" id="accountCreatedOkBtn" class="btn-small account-created-confirm-btn" onclick="confirmAccountCreation()">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Deleted Confirmation Modal -->
+        <div id="accountDeletedModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="accountDeletedTitle">
+            <div class="sign-out-modal">
+                <h3 id="accountDeletedTitle">Account Deleted</h3>
+                <p>Your account and chat history have been permanently deleted.</p>
+                <div class="sign-out-modal-actions">
+                    <button type="button" id="accountDeletedOkBtn" class="btn-small sign-out-confirm-btn" onclick="confirmAccountDeletion()">OK</button>
+                </div>
+            </div>
+        </div>
+
     </body>
 
 </html>
