@@ -52,6 +52,7 @@ button {
 .auth-screen {
   width: 100%;
   min-height: 620px;
+  height: 620px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -60,8 +61,10 @@ button {
 }
 
 .welcome-title {
+  flex: 0 0 auto;
   width: min(100%, 540px);
   margin-bottom: clamp(50px, 60px, 80px);
+  transform: translateX(-5px);
 }
 
 .welcome-title-art {
@@ -655,6 +658,7 @@ button.send-btn:focus-visible,
 
   .auth-screen {
     min-height: 640px;
+    height: 640px;
   }
 
   .auth-container {
