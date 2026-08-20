@@ -8,10 +8,185 @@ let finalSpeechTranscript = '';
 let shouldIgnoreSpeechResults = false;
 let speechErrorMessage = '';
 let speechStatusTimer = null;
+const PASSWORD_REVEAL_DURATION = 400;
+const passwordInputStates = new WeakMap();
 
 function getFirstName(name) {
     const nameParts = String(name || '').trim().split(/\s+/);
     return nameParts[0] || 'there';
+}
+
+function getPasswordInputState(input) {
+    let state = passwordInputStates.get(input);
+
+    if (!state) {
+        state = {
+            value: input.value,
+            isVisible: input.type === 'text',
+            isTemporarilyRevealed: false,
+            revealTimer: null,
+            selectionStart: input.selectionStart ?? input.value.length
+        };
+        passwordInputStates.set(input, state);
+    }
+
+    return state;
+}
+
+function clearPasswordRevealTimer(state) {
+    if (state.revealTimer) {
+        window.clearTimeout(state.revealTimer);
+        state.revealTimer = null;
+    }
+}
+
+function syncPasswordInputState(input, state) {
+    if (!state.isTemporarilyRevealed) {
+        state.value = input.value;
+    }
+}
+
+function setPasswordCaret(input, position) {
+    const caretPosition = Math.max(0, Math.min(position, input.value.length));
+    if (document.activeElement === input) {
+        input.setSelectionRange(caretPosition, caretPosition);
+    }
+}
+
+function restorePasswordMask(input, state = getPasswordInputState(input)) {
+    clearPasswordRevealTimer(state);
+    if (state.isVisible) return;
+
+    state.isTemporarilyRevealed = false;
+    input.type = 'password';
+    input.value = state.value;
+    setPasswordCaret(input, state.selectionStart);
+}
+
+function revealLastPasswordCharacter(input, state, revealIndex, caretPosition) {
+    clearPasswordRevealTimer(state);
+
+    if (state.isVisible || !state.value) return;
+
+    const characterIndex = Math.max(0, Math.min(revealIndex, state.value.length - 1));
+    const maskedValue = '\u2022'.repeat(state.value.length);
+
+    state.isTemporarilyRevealed = true;
+    state.selectionStart = caretPosition;
+    input.type = 'text';
+    input.value = `${maskedValue.slice(0, characterIndex)}${state.value.charAt(characterIndex)}${maskedValue.slice(characterIndex + 1)}`;
+    setPasswordCaret(input, caretPosition);
+
+    state.revealTimer = window.setTimeout(() => {
+        restorePasswordMask(input, state);
+    }, PASSWORD_REVEAL_DURATION);
+}
+
+function getPasswordInputValue(input) {
+    const state = getPasswordInputState(input);
+    syncPasswordInputState(input, state);
+    return state.value;
+}
+
+function clearPasswordInput(input) {
+    const state = getPasswordInputState(input);
+
+    clearPasswordRevealTimer(state);
+    state.value = '';
+    state.isVisible = false;
+    state.isTemporarilyRevealed = false;
+    state.selectionStart = 0;
+    input.type = 'password';
+    input.value = '';
+}
+
+function hidePasswordInput(input) {
+    const state = getPasswordInputState(input);
+    syncPasswordInputState(input, state);
+
+    state.isVisible = false;
+    restorePasswordMask(input, state);
+}
+
+function notifyPasswordEdited(input) {
+    if (input.id === 'deletePassword') {
+        clearDeletePasswordError();
+    }
+}
+
+function handlePasswordInput(event) {
+    const input = event.currentTarget;
+    const state = getPasswordInputState(input);
+
+    if (state.isTemporarilyRevealed && !state.isVisible) return;
+
+    state.value = input.value;
+    state.selectionStart = input.selectionStart ?? state.value.length;
+
+    if (state.isVisible || !event.inputType?.startsWith('insert') || !state.value) return;
+
+    revealLastPasswordCharacter(input, state, state.selectionStart - 1, state.selectionStart);
+}
+
+function handlePasswordBeforeInput(event) {
+    const input = event.currentTarget;
+    const state = getPasswordInputState(input);
+
+    if (!state.isTemporarilyRevealed || state.isVisible) return;
+
+    const inputType = event.inputType;
+    const selectionStart = input.selectionStart ?? state.selectionStart;
+    const selectionEnd = input.selectionEnd ?? selectionStart;
+
+    if (inputType.startsWith('insert')) {
+        const insertedText = event.data;
+
+        // Fall back to native masking for input methods that do not expose their text.
+        if (!insertedText) {
+            restorePasswordMask(input, state);
+            return;
+        }
+
+        event.preventDefault();
+        state.value = `${state.value.slice(0, selectionStart)}${insertedText}${state.value.slice(selectionEnd)}`;
+        state.selectionStart = selectionStart + insertedText.length;
+        revealLastPasswordCharacter(input, state, state.selectionStart - 1, state.selectionStart);
+        notifyPasswordEdited(input);
+        return;
+    }
+
+    let nextValue = state.value;
+    let nextSelectionStart = selectionStart;
+
+    if (inputType === 'deleteContentBackward') {
+        if (selectionStart !== selectionEnd) {
+            nextValue = `${state.value.slice(0, selectionStart)}${state.value.slice(selectionEnd)}`;
+        } else if (selectionStart > 0) {
+            nextValue = `${state.value.slice(0, selectionStart - 1)}${state.value.slice(selectionStart)}`;
+            nextSelectionStart -= 1;
+        }
+    } else if (inputType === 'deleteContentForward') {
+        nextValue = `${state.value.slice(0, selectionStart)}${state.value.slice(selectionEnd === selectionStart ? selectionStart + 1 : selectionEnd)}`;
+    } else if (inputType === 'deleteByCut' || inputType === 'deleteByDrag') {
+        nextValue = `${state.value.slice(0, selectionStart)}${state.value.slice(selectionEnd)}`;
+    } else {
+        restorePasswordMask(input, state);
+        return;
+    }
+
+    event.preventDefault();
+    state.value = nextValue;
+    state.selectionStart = nextSelectionStart;
+    restorePasswordMask(input, state);
+    notifyPasswordEdited(input);
+}
+
+function initializePasswordCharacterReveal() {
+    document.querySelectorAll('#password, #deletePassword').forEach((input) => {
+        getPasswordInputState(input);
+        input.addEventListener('beforeinput', handlePasswordBeforeInput);
+        input.addEventListener('input', handlePasswordInput);
+    });
 }
 
 function getSpeechRecognitionConstructor() {
@@ -211,7 +386,7 @@ function toggleMode() {
     const pwdInput = document.getElementById('password');
     const eyeOpen = document.getElementById('eyeOpen');
     const eyeClosed = document.getElementById('eyeClosed');
-    pwdInput.type = 'password';
+    hidePasswordInput(pwdInput);
     eyeOpen.style.display = 'block';
     eyeClosed.style.display = 'none';
 
@@ -236,13 +411,18 @@ function togglePassword() {
     const pwdInput = document.getElementById('password');
     const eyeOpen = document.getElementById('eyeOpen');
     const eyeClosed = document.getElementById('eyeClosed');
+    const state = getPasswordInputState(pwdInput);
+    syncPasswordInputState(pwdInput, state);
 
-    if (pwdInput.type === 'password') {
+    if (!state.isVisible) {
+        restorePasswordMask(pwdInput, state);
+        state.isVisible = true;
         pwdInput.type = 'text';
+        pwdInput.value = state.value;
         eyeOpen.style.display = 'none';
         eyeClosed.style.display = 'block';
     } else {
-        pwdInput.type = 'password';
+        hidePasswordInput(pwdInput);
         eyeOpen.style.display = 'block';
         eyeClosed.style.display = 'none';
     }
@@ -252,7 +432,7 @@ async function signUp() {
     hideMessages();
     const name = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
+    const password = getPasswordInputValue(document.getElementById('password')).trim();
         
     if (!name) return showMessage("Please enter your name.");
     else if (!email) return showMessage("Please enter your email address.");
@@ -277,7 +457,7 @@ async function signUp() {
 async function signIn() {
     hideMessages();
     const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
+    const password = getPasswordInputValue(document.getElementById('password')).trim();
         
     if (!email && !password) return showMessage("Please enter your email address and password.");
     else if (!email) return showMessage("Please enter your email address.");
@@ -302,7 +482,7 @@ async function signIn() {
         
         document.getElementById('name').value = '';
         document.getElementById('email').value = '';
-        document.getElementById('password').value = '';
+        clearPasswordInput(document.getElementById('password'));
         
         loadUserHistory();
     }
@@ -311,13 +491,14 @@ async function signIn() {
 function deleteAccount() {
     // Show the model and clear out any old text
     document.getElementById('deleteModel').style.display = 'flex';
-    document.getElementById('deletePassword').value = '';
+    clearPasswordInput(document.getElementById('deletePassword'));
     clearDeletePasswordError();
 }
 
 function closeDeleteModel() {
     // Hide the model
     document.getElementById('deleteModel').style.display = 'none';
+    clearPasswordInput(document.getElementById('deletePassword'));
     clearDeletePasswordError();
 }
 
@@ -353,7 +534,7 @@ function clearDeletePasswordError() {
 }
 
 async function confirmDeleteAccount() {
-    const password = document.getElementById('deletePassword').value.trim();
+    const password = getPasswordInputValue(document.getElementById('deletePassword')).trim();
     
     if (!password) {
         showDeletePasswordError('Please enter your password to confirm.');
@@ -427,14 +608,13 @@ function performSignOut() {
     // 4. Clear the input fields so the old password doesn't sit there
     document.getElementById('name').value = '';
     document.getElementById('email').value = '';
-    document.getElementById('password').value = '';
 
     // 5. Force the password field back to hidden (Reset the eye icons)
     const pwdInput = document.getElementById('password');
     const eyeOpen = document.getElementById('eyeOpen');
     const eyeClosed = document.getElementById('eyeClosed');
         
-    pwdInput.type = 'password';
+    clearPasswordInput(pwdInput);
     eyeOpen.style.display = 'block';
     eyeClosed.style.display = 'none';
     
@@ -534,4 +714,5 @@ function appendMessage(text, role) {
 
 }
 
+document.addEventListener('DOMContentLoaded', initializePasswordCharacterReveal);
 initializeSpeechRecognition();
